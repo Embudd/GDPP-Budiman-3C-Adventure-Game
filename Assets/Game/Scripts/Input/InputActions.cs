@@ -136,6 +136,24 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""24aa995b-4439-4b6b-92ab-0438c3076abb"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ChangePOV"",
+                    ""type"": ""Button"",
+                    ""id"": ""a303e604-7ffa-4598-93f3-5729eccb2437"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -237,6 +255,28 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""action"": ""CancelClimb"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0e9a7194-23f2-4037-8e7c-458969d7d360"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""54bdb371-fbaa-4b32-ba83-8f218f2b82f0"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ChangePOV"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -250,6 +290,8 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Climb = m_Player.FindAction("Climb", throwIfNotFound: true);
         m_Player_CancelClimb = m_Player.FindAction("CancelClimb", throwIfNotFound: true);
+        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
+        m_Player_ChangePOV = m_Player.FindAction("ChangePOV", throwIfNotFound: true);
     }
 
     ~@InputActions()
@@ -335,6 +377,8 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Climb;
     private readonly InputAction m_Player_CancelClimb;
+    private readonly InputAction m_Player_Look;
+    private readonly InputAction m_Player_ChangePOV;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -366,6 +410,14 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/CancelClimb".
         /// </summary>
         public InputAction @CancelClimb => m_Wrapper.m_Player_CancelClimb;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Look".
+        /// </summary>
+        public InputAction @Look => m_Wrapper.m_Player_Look;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ChangePOV".
+        /// </summary>
+        public InputAction @ChangePOV => m_Wrapper.m_Player_ChangePOV;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -407,6 +459,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @CancelClimb.started += instance.OnCancelClimb;
             @CancelClimb.performed += instance.OnCancelClimb;
             @CancelClimb.canceled += instance.OnCancelClimb;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
+            @ChangePOV.started += instance.OnChangePOV;
+            @ChangePOV.performed += instance.OnChangePOV;
+            @ChangePOV.canceled += instance.OnChangePOV;
         }
 
         /// <summary>
@@ -433,6 +491,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @CancelClimb.started -= instance.OnCancelClimb;
             @CancelClimb.performed -= instance.OnCancelClimb;
             @CancelClimb.canceled -= instance.OnCancelClimb;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
+            @ChangePOV.started -= instance.OnChangePOV;
+            @ChangePOV.performed -= instance.OnChangePOV;
+            @ChangePOV.canceled -= instance.OnChangePOV;
         }
 
         /// <summary>
@@ -508,5 +572,19 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancelClimb(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Look" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLook(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ChangePOV" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnChangePOV(InputAction.CallbackContext context);
     }
 }

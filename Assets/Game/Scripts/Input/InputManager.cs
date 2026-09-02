@@ -18,6 +18,8 @@ public class InputManager : MonoBehaviour, IPlayerActions
     public event Action OnCancelClimbInput;
 
 
+    public event Action OnChangePOV;
+
 
     private void Awake()
     {
@@ -31,6 +33,7 @@ public class InputManager : MonoBehaviour, IPlayerActions
     private void OnDisable()
     {
         _inputActions.Disable();
+        _inputActions.Player.SetCallbacks(null);
     }
 
 
@@ -84,6 +87,19 @@ public class InputManager : MonoBehaviour, IPlayerActions
         if (context.performed)
         {
             OnCancelClimbInput?.Invoke();
+        }
+    }
+
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        // Handle by CinemachineInputAxis 
+    }
+
+    void IPlayerActions.OnChangePOV(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnChangePOV?.Invoke();
         }
     }
 }

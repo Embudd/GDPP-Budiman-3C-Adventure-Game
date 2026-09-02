@@ -6,9 +6,18 @@ public class PlayerMovement : MonoBehaviour
 
 
     [SerializeField]
+    private Transform _cameraTransform;
+    [SerializeField]
+    private CameraManager _cameraManager;
+    [SerializeField]
+    private Animator _animator;
+
+
+
+    [SerializeField]
     private InputManager _input;
     [SerializeField]
-    private Rigidbody _rb;
+    private Rigidbody _rigidbody;
 
     [SerializeField]
     private float _walkSpeed = 350f;
@@ -80,6 +89,7 @@ public class PlayerMovement : MonoBehaviour
         _input.OnJumpInput += InputManager_OnJump;
         _input.OnClimbInput += StartClimb;
         _input.OnCancelClimbInput += CancelClimb;
+        _cameraManager.OnChangePerspective += ChangePerspective;
     }
 
 
@@ -90,6 +100,7 @@ public class PlayerMovement : MonoBehaviour
         _input.OnJumpInput -= InputManager_OnJump;
         _input.OnClimbInput -= StartClimb;
         _input.OnCancelClimbInput -= CancelClimb;
+        _cameraManager.OnChangePerspective -= ChangePerspective;
     }
 
     private void Update()
@@ -116,13 +127,33 @@ public class PlayerMovement : MonoBehaviour
 
         if (isPlayerStanding)
         {
-            if (_movementDirection.magnitude >= 0.1)
+
+            Vector3 velocity = new Vector3(_rigidbody.linearVelocity.x, 0, _rigidbody.linearVelocity.z);
+            _animator.SetFloat("Velocity", _movementDirection.magnitude * velocity.magnitude);
+            _animator.SetFloat("VelocityX", velocity.magnitude * _movementDirection.x);
+            _animator.SetFloat("VelocityZ", velocity.magnitude * _movementDirection.z);
+
+            switch (_cameraManager.CameraState)
             {
-                float rotationAngle = Mathf.Atan2(_movementDirection.x, _movementDirection.z) * Mathf.Rad2Deg;
-                float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, rotationAngle, ref _rotationSmoothVelocity, _rotationSmoothTime);
-                transform.rotation = Quaternion.Euler(0f, smoothAngle, 0f);
-                movementDirection = Quaternion.Euler(0f, rotationAngle, 0f) * Vector3.forward;
-                _rb.AddForce(movementDirection * Time.deltaTime * _speed);
+                case CameraState.ThirdPerson:
+                    if (_movementDirection.magnitude >= 0.1)
+                    {
+                        float rotationAngle = Mathf.Atan2(_movementDirection.x, _movementDirection.z) * Mathf.Rad2Deg + _cameraTransform.eulerAngles.y;
+                        float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, rotationAngle, ref _rotationSmoothVelocity, _rotationSmoothTime);
+                        transform.rotation = Quaternion.Euler(0f, smoothAngle, 0f);
+                        movementDirection = Quaternion.Euler(0f, rotationAngle, 0f) * Vector3.forward;
+                        _rigidbody.AddForce(movementDirection * Time.deltaTime * _speed);
+                    }
+                    break;
+                case CameraState.FirstPerson:
+                    transform.rotation = Quaternion.Euler(0f, _cameraTransform.eulerAngles.y, 0f);
+                    Vector3 verticalDirection = _movementDirection.z * transform.forward;
+                    Vector3 horizontalDirection = _movementDirection.x * transform.right;
+                    movementDirection = verticalDirection + horizontalDirection;
+                    _rigidbody.AddForce(movementDirection * Time.deltaTime * _speed);
+                    break;
+                default:
+                    break;
             }
         }
         else if (isPlayerClimbing)
@@ -130,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
             Vector3 horizontal = _movementDirection.x * transform.right;
             Vector3 vertical = _movementDirection.z * transform.up;
             movementDirection = horizontal + vertical;
-            _rb.AddForce(movementDirection * Time.deltaTime * _climbSpeed);
+            _rigidbody.AddForce(movementDirection * Time.deltaTime * _climbSpeed);
         }
     }
 
@@ -169,7 +200,7 @@ public class PlayerMovement : MonoBehaviour
         if (_isGrounded)
         {
             Vector3 jumpDirection = Vector3.up;
-            _rb.AddForce(jumpDirection * _jumpForce * Time.deltaTime);
+            _rigidbody.AddForce(jumpDirection * _jumpForce * Time.deltaTime);
         }
     }
 
@@ -182,8 +213,7 @@ public class PlayerMovement : MonoBehaviour
     #endregion  
 
 
-    # region StepForce
-
+    # region StepSlope
     private void CheckStep()
     {
         bool isHitLowerStep = Physics.Raycast(_groundDetector.position,
@@ -195,7 +225,7 @@ public class PlayerMovement : MonoBehaviour
                                                 _stepCheckerDistance);
         if (isHitLowerStep && !isHitUpperStep)
         {
-            _rb.AddForce(0, _stepForce, 0);
+            _rigidbody.AddForce(0, _stepForce, 0);
         }
     }
 
@@ -216,11 +246,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (isInFrontOfClimbingWall && _isGrounded && isNotClimbing)
         {
-            Debug.Log("Climb");
+            _cameraManager.SetFPSClampedCamera(true, transform.rotation.eulerAngles);
+            _cameraManager.SetTPSFieldOfView(70);
             Vector3 offset = (transform.forward * _climbOffset.z) + (Vector3.up * _climbOffset.y);
             transform.position = hit.point - offset;
             _playerStance = PlayerStance.Climb;
-            _rb.useGravity = false;
+            _rigidbody.useGravity = false;
         }
     }
 
@@ -229,10 +260,22 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStance == PlayerStance.Climb)
         {
+            _cameraManager.SetFPSClampedCamera(false, transform.rotation.eulerAngles);
+            _cameraManager.SetTPSFieldOfView(40);
             _playerStance = PlayerStance.Stand;
-            _rb.useGravity = true;
+            _rigidbody.useGravity = true;
             transform.position -= transform.forward * 1f;
         }
+    }
+
+    #endregion
+
+
+    #region Perspective
+
+    private void ChangePerspective()
+    {
+        _animator.SetTrigger("ChangePerspective");
     }
 
     #endregion
