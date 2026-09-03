@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using static InputActions;
 
 
-public class InputManager : MonoBehaviour, IPlayerActions   
+public class InputManager : MonoBehaviour, IPlayerActions
 {
 
 
@@ -16,6 +16,10 @@ public class InputManager : MonoBehaviour, IPlayerActions
     public event Action<bool> OnJumpInput;
     public event Action OnClimbInput;
     public event Action OnCancelClimbInput;
+    public event Action OnCrouchInput;
+    public event Action OnGlideInput;
+    public event Action OnCancelGlide;
+    public event Action OnPunchInput;
 
 
     public event Action OnChangePOV;
@@ -28,7 +32,7 @@ public class InputManager : MonoBehaviour, IPlayerActions
         _inputActions.Enable();
         _inputActions.Player.SetCallbacks(this);
     }
-    
+
 
     private void OnDisable()
     {
@@ -41,8 +45,8 @@ public class InputManager : MonoBehaviour, IPlayerActions
     {
         if (context.performed)
         {
-            OnMoveInput?.Invoke(context.ReadValue<Vector2>());    
-        }        
+            OnMoveInput?.Invoke(context.ReadValue<Vector2>());
+        }
         else
         {
             OnMoveInput?.Invoke(Vector2.zero);
@@ -53,7 +57,7 @@ public class InputManager : MonoBehaviour, IPlayerActions
     {
         if (context.performed)
         {
-            OnSprintInput?.Invoke(true);    
+            OnSprintInput?.Invoke(true);
         }
         else
         {
@@ -67,10 +71,6 @@ public class InputManager : MonoBehaviour, IPlayerActions
         if (context.performed)
         {
             OnJumpInput?.Invoke(true);
-        }
-        else
-        {
-            OnJumpInput?.Invoke(false);
         }
     }
 
@@ -100,6 +100,38 @@ public class InputManager : MonoBehaviour, IPlayerActions
         if (context.performed)
         {
             OnChangePOV?.Invoke();
+        }
+    }
+
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnCrouchInput?.Invoke();
+        }
+    }
+
+    public void OnGlide(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnGlideInput?.Invoke();
+        }
+    }
+
+    void IPlayerActions.OnCancelGlide(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnCancelGlide?.Invoke();
+        }
+    }
+
+    public void OnPunch(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnPunchInput?.Invoke();
         }
     }
 }
