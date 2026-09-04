@@ -95,6 +95,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private LayerMask _hitLayer;
 
+    [SerializeField]
+    private Transform _resetCheckpointPosition;
+
 
     private Vector3 _movementDirection;
     private bool _isSprintPressed;
@@ -443,8 +446,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_isPunching && _playerStance == PlayerStance.Stand && _isGrounded)
         {
-            _isPunching = true;
-            _animator.SetBool("IsPunching", _isPunching);
+            _isPunching = true;            
 
             if (_combo < 3)
             {
@@ -462,8 +464,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void EndPunch()
     {
-        _isPunching = false;
-        _animator.SetBool("IsPunching", _isPunching);
+        _isPunching = false;        
         Debug.Log("EndPunch");
 
         if (_resetCombo != null)
@@ -494,4 +495,14 @@ public class PlayerMovement : MonoBehaviour
     }
 
     #endregion
+
+
+    public void ResetPositionToCheckpoint()
+    {
+        if (_resetCheckpointPosition != null)
+        {
+            transform.position = _resetCheckpointPosition.position;
+            transform.rotation = _resetCheckpointPosition.rotation;
+        }
+    }
 }

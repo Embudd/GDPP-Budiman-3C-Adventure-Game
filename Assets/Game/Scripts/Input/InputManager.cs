@@ -25,6 +25,9 @@ public class InputManager : MonoBehaviour, IPlayerActions
     public event Action OnChangePOV;
 
 
+    public event Action OnMainMenuInput;    
+
+
     private void Awake()
     {
         _inputActions = new InputActions();
@@ -132,6 +135,14 @@ public class InputManager : MonoBehaviour, IPlayerActions
         if (context.performed)
         {
             OnPunchInput?.Invoke();
+        }
+    }
+
+    public void OnMainMenu(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            OnMainMenuInput?.Invoke();
         }
     }
 }
